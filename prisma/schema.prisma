@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id             String     @id
+  warnings_count Int        @default(0)
+  warnings       warnings[]
+}
+
+model warnings {
+  id           Int      @id @default(sequence())
+  user_id      String
+  moderator_id String
+  reason       String
+  created_at   DateTime @default(now())
+  user         users    @relation(fields: [user_id], references: [id])
+}
+
+model tickets {
+  id         Int      @id @default(sequence())
+  user_id    String
+  channel_id String
+  status     String   @default("open")
+}
+
+model guild_settings {
+  guild_id        String  @id
+  log_channel     String?
+  autorole        String?
+  welcome_channel String?
+}

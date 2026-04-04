@@ -1,0 +1,129 @@
+const { Events, EmbedBuilder, ChannelType, PermissionFlagsBits, ButtonBuilder, ButtonStyle, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+// const prisma = require('../database');
+
+module.exports = {
+    name: Events.InteractionCreate,
+    async execute(interaction, client) {
+        if (interaction.isStringSelectMenu() || interaction.isButton()) {
+            const embed = new EmbedBuilder().setColor('#2B2D31').setTimestamp();
+            const customId = interaction.isStringSelectMenu() ? interaction.values[0] : interaction.customId;
+            
+            if (customId === 'cmd_category') return; // Ignore the choice wrapper ID if necessary, but we used value for the actual choice.
+            
+            if (customId.startsWith('open_ticket')) {
+                const parts = interaction.customId.split(':');
+                const categoryId = parts[1] === 'none' ? null : parts[1];
+                const staffRoleId = parts[2] === 'none' ? null : parts[2];
+
+                const overwrites = [
+                    {
+                        id: interaction.guild.roles.everyone.id,
+                        deny: [PermissionFlagsBits.ViewChannel],
+                    },
+                    {
+                        id: interaction.user.id,
+                        allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory],
+                    },
+                ];
+
+                if (staffRoleId) {
+                    overwrites.push({
+                        id: staffRoleId,
+                        allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory, PermissionFlagsBits.ManageMessages],
+                    });
+                }
+
+                const ticketChannel = await interaction.guild.channels.create({
+                    name: `ticket-${interaction.user.username}`,
+                    type: ChannelType.GuildText,
+                    parent: categoryId,
+                    permissionOverwrites: overwrites,
+                });
+
+                const ticketEmbed = new EmbedBuilder()
+                    .setColor('#2B2D31')
+                    .setTitle('🎫 Ticket Opened')
+                    .setDescription(`Hello ${interaction.user}, welcome to your ticket! Please describe your issue clearly.\n\nOur staff will be with you shortly.`)
+                    .setFooter({ text: 'VlaamsCore • Ticket System' });
+
+                const row = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder().setCustomId('claim_ticket').setLabel('Claim Ticket').setStyle(ButtonStyle.Success).setEmoji('🙋‍♂️'),
+                        new ButtonBuilder().setCustomId('close_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('🔒')
+                    );
+
+                await ticketChannel.send({ content: `${interaction.user} | @here`, embeds: [ticketEmbed], components: [row] });
+                return interaction.reply({ content: `✅ Ticket created: ${ticketChannel}`, ephemeral: true });
+            }
+
+            switch (customId) {
+                case 'claim_ticket':
+                    if (interaction.message.content.includes('Claimed by:')) {
+                         return interaction.reply({ content: '❌ This ticket is already claimed!', ephemeral: true });
+                    }
+                    const claimEmbed = EmbedBuilder.from(interaction.message.embeds[0])
+                         .addFields({ name: 'Claimed By', value: `${interaction.user} (${interaction.user.tag})`, inline: true });
+                    
+                    await interaction.message.edit({ embeds: [claimEmbed] });
+                    return interaction.reply({ content: `✅ You have claimed this ticket!`, ephemeral: true });
+
+                case 'close_ticket':
+                    if (!interaction.channel.name.startsWith('ticket-')) return;
+                    await interaction.reply('🔒 This ticket will be closed in 5 seconds...');
+                    setTimeout(() => interaction.channel.delete().catch(() => {}), 5000);
+                    return;
+
+                case 'cat_mod':
+                    embed.setTitle('🛡️ Moderation & Protection')
+                        .setDescription('Top-tier moderation and server security tools.')
+                        .addFields(
+                            { name: '🛡️ Protection', value: '`/antispam`, `/antinuke`, `/lock`, `/unlock`, `/slowmode`', inline: false },
+                            { name: '🔨 Moderation', value: '`/ban`, `/unban`, `/softban`, `/kick`, `/timeout`, `/warn`, `/clear`, `/nick`', inline: false },
+                            { name: '🔊 Voice Mod', value: '`/vckick`, `/vcmute`, `/vcunmute`', inline: false }
+                        );
+                    break;
+                case 'cat_ticket':
+                    embed.setTitle('🎫 Ticket System')
+                        .setDescription('Complete support management suite.')
+                        .addFields(
+                            { name: '🎫 Tickets', value: '`/ticket setup`, `/ticket close`, `/ticket add`, `/ticket remove`', inline: false }
+                        );
+                    break;
+                case 'cat_fun':
+                    embed.setTitle('🎉 Fun & Social')
+                        .setDescription('Entertainment for your community members.')
+                        .addFields(
+                            { name: '🎮 Games', value: '`/counting setup`, `/8ball`, `/coinflip`, `/rps`', inline: false },
+                            { name: '🫂 Social', value: '`/slap`, `/hug`, `/truth`, `/dare`', inline: false }
+                        );
+                    break;
+            }
+            return interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+
+        if (!interaction.isChatInputCommand()) return;
+
+        const command = client.commands.get(interaction.commandName);
+
+        if (!command) {
+            console.error(`[Error] No command matching ${interaction.commandName} was found.`);
+            return;
+        }
+
+        try {
+            await command.execute(interaction, client);
+        } catch (error) {
+            console.error(error);
+            const embed = new EmbedBuilder()
+                .setColor('#FF0000')
+                .setTitle('❌ Error')
+                .setDescription('There was an error while executing this command!');
+
+            if (interaction.replied || interaction.deferred) {
+                await interaction.followUp({ embeds: [embed], ephemeral: true });
+            } else {
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+            }
+        }
+    },
+};
