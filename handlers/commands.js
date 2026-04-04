@@ -20,28 +20,35 @@ module.exports = async (client) => {
         }
     }
 
+    // Command registration logic
+    if (!process.env.DISCORD_TOKEN || !process.env.CLIENT_ID) {
+        console.warn('[Notice] Skipping command registration: Missing DISCORD_TOKEN or CLIENT_ID.');
+        return;
+    }
+
     const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
     try {
-        console.log(`Started refreshing ${commandsArray.length} application (/) commands.`);
+        console.log(`[Registration] Started refreshing ${commandsArray.length} application (/) commands.`);
 
-        // The put method is used to fully refresh all commands
-        // If GUILD_ID is provided, register for testing. Otherwise, global.
+        // Register for a specific guild if GUILD_ID is provided (fastest for development)
         if (process.env.GUILD_ID) {
             await rest.put(
                 Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
                 { body: commandsArray },
             );
-            console.log('Successfully reloaded local guild (/) commands.');
+            console.log(`[Registration] Successfully reloaded local guild (/) commands for ${process.env.GUILD_ID}.`);
         } else {
+            // Global registration (can take up to 1 hour to propagate, but usually faster)
             await rest.put(
                 Routes.applicationCommands(process.env.CLIENT_ID),
                 { body: commandsArray },
             );
-            console.log('Successfully reloaded global (/) commands.');
+            console.log('[Registration] Successfully reloaded global (/) commands.');
         }
 
     } catch (error) {
-        console.error(error);
+        console.error('[Registration Error]', error);
     }
 };
+
