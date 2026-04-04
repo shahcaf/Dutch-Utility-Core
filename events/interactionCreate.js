@@ -147,18 +147,19 @@ module.exports = {
         try {
             await command.execute(interaction, client);
         } catch (error) {
-            console.error(error);
+            console.error(`[Error] Failed to execute /${interaction.commandName}:`, error);
             const errorEmbed = new EmbedBuilder()
                 .setColor('#FF0000')
                 .setTitle('❌ Execution Error')
-                .setDescription('There was an error while executing this command!');
+                .setDescription('There was an error while executing this command! Please try again later.');
 
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.followUp({ embeds: [errorEmbed], ephemeral: true }).catch(() => {});
             } else {
-                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [errorEmbed], ephemeral: true }).catch(() => {});
             }
         }
     },
 };
+
 

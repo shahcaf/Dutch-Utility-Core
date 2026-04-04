@@ -9,6 +9,9 @@ module.exports = {
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
     async execute(interaction, client) {
+        // Defer reply immediately since DB calls below might be slow
+        await interaction.deferReply();
+
         const user = interaction.options.getUser('user');
         const reason = interaction.options.getString('reason');
         
@@ -58,7 +61,6 @@ module.exports = {
             .setFooter({ text: `Status: ${dbStatus}` })
             .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     },
 };
-
