@@ -58,7 +58,15 @@ client.commands = new Collection();
         console.error('[Unhandled Rejection]', error);
     });
 
+    if (!process.env.DISCORD_TOKEN) {
+        console.error('\n[CRITICAL ERROR] The DISCORD_TOKEN environment variable is missing on Render!');
+        console.error('Please configure your Environment Variables in the Render Dashboard.\n');
+        process.exit(1);
+    }
+    
+    console.log('[Bot] Attempting to login to Discord...');
     await client.login(process.env.DISCORD_TOKEN);
+    console.log(`[Bot] Successfully completed login sequence.`);
 
     // Update Webhook System
     const webhook = new WebhookClient({ url: 'https://discord.com/api/webhooks/1490028594380931205/aOA5y3SvUWhbjkq1AIE2zgG9L3NyZdnCJqYu-vtjitDcjnrNbfDCnakpaEaui2Kk9q__' });
