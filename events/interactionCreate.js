@@ -103,8 +103,9 @@ module.exports = {
 
         if (!interaction.isChatInputCommand()) return;
 
-        const command = client.commands.get(interaction.commandName);
+        console.log(`[Interaction] Received Command: /${interaction.commandName} from ${interaction.user.tag}`);
 
+        const command = client.commands.get(interaction.commandName);
         if (!command) {
             console.error(`[Error] No command matching ${interaction.commandName} was found.`);
             return;
