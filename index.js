@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, WebhookClient, EmbedBuilder } = require('discord.js');
 const express = require('express');
 // const prisma = require('./database'); // Temporarily disabled
 const loadCommands = require('./handlers/commands');
@@ -45,5 +45,20 @@ client.commands = new Collection();
         console.error('[Unhandled Rejection]', error);
     });
 
-    client.login(process.env.DISCORD_TOKEN);
+    await client.login(process.env.DISCORD_TOKEN);
+
+    // Update Webhook Announcement
+    const webhook = new WebhookClient({ url: 'https://discord.com/api/webhooks/1490028594380931205/aOA5y3SvUWhbjkq1AIE2zgG9L3NyZdnCJqYu-vtjitDcjnrNbfDCnakpaEaui2Kk9q__' });
+    const updateEmbed = new EmbedBuilder()
+        .setColor('#2ecc71')
+        .setTitle('🚀 VlaamsCore Update System')
+        .setDescription('**Status:** Bot is successfully online and updated.\n\nAll commands and events are currently synchronized with the latest GitHub build.')
+        .setTimestamp()
+        .setFooter({ text: 'VlaamsCore • Powered by High-End Technology' });
+
+    webhook.send({
+        username: 'VlaamsCore Updates',
+        avatarURL: 'https://cdn.discordapp.com/embed/avatars/0.png',
+        embeds: [updateEmbed],
+    }).catch(console.error);
 })();
