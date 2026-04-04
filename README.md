@@ -13,22 +13,24 @@ A robust, modular Discord bot specifically tailored for moderation, server manag
 1. **Clone the repository.**
 2. **Install dependencies:** `npm install`
 3. **Database Setup:**
-   * Create a CockroachDB cluster or use a local instance.
-   * Get your connection string (e.g. `postgresql://user:password@host:26257/defaultdb?sslmode=verify-full`).
-4. **Environment Variables:**
-   * Rename `.env.example` to `.env`.
-   * Fill in `DISCORD_TOKEN`, `CLIENT_ID`, `DATABASE_URL`.
-5. **Database Migration:**
-   * Run `npx prisma db push` to synchronize the schema with your database.
-6. **Start the Bot:**
+   * Create a CockroachDB cluster.
+   * Add your `DATABASE_URL` to the `.env` file.
+4. **Database Migration:**
+   * Run `npm run build` to synchronize the schema and generate the client.
+5. **Start the Bot:**
    * Run `npm start`.
 
 ## Deployment to Render
 
-1. Add your repository to Render as a "Web Service".
-2. **Build Command:** `npm install && npx prisma db push`
+1. Create a new "Web Service" on [Render](https://render.com).
+2. **Build Command:** `npm run build`
 3. **Start Command:** `npm start`
-4. Make sure to add your Environment Variables (`DISCORD_TOKEN`, `CLIENT_ID`, `DATABASE_URL`) in the Render dashboard.
+4. **Environment Variables:**
+   * `NODE_VERSION`: `22.12.0`
+   * `DISCORD_TOKEN`: Your bot token.
+   * `CLIENT_ID`: Your bot's client ID.
+   * `DATABASE_URL`: Your CockroachDB URL.
+   * `RENDER_EXTERNAL_URL`: Your app's Render URL (for Keep-Alive).
 
 ## Features
 
