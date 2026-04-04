@@ -7,7 +7,7 @@ module.exports = {
         console.log(`[Ready] Logged in as ${client.user.tag}`);
         
         client.user.setPresence({
-            activities: [{ name: '/cmd config', type: ActivityType.Watching }],
+            activities: [{ name: 'Maded by r4z_x', type: ActivityType.Watching }],
             status: 'online',
         });
     },
