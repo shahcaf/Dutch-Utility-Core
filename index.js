@@ -47,18 +47,27 @@ client.commands = new Collection();
 
     await client.login(process.env.DISCORD_TOKEN);
 
-    // Update Webhook Announcement
+    // Update Webhook System
     const webhook = new WebhookClient({ url: 'https://discord.com/api/webhooks/1490028594380931205/aOA5y3SvUWhbjkq1AIE2zgG9L3NyZdnCJqYu-vtjitDcjnrNbfDCnakpaEaui2Kk9q__' });
-    const updateEmbed = new EmbedBuilder()
-        .setColor('#2ecc71')
-        .setTitle('🚀 VlaamsCore Update System')
-        .setDescription('**Status:** Bot is successfully online and updated.\n\nAll commands and events are currently synchronized with the latest GitHub build.')
-        .setTimestamp()
-        .setFooter({ text: 'VlaamsCore • Powered by High-End Technology' });
+    
+    const sendUpdate = () => {
+        const updateEmbed = new EmbedBuilder()
+            .setColor('#2ecc71')
+            .setTitle('🚀 VlaamsCore Status Report')
+            .setDescription('**Status:** Bot remains online and fully operational.\n\nAll systems are currently optimized and healthy.')
+            .setTimestamp()
+            .setFooter({ text: 'VlaamsCore • Powered by High-End Technology' });
 
-    webhook.send({
-        username: 'VlaamsCore Updates',
-        avatarURL: 'https://cdn.discordapp.com/embed/avatars/0.png',
-        embeds: [updateEmbed],
-    }).catch(console.error);
+        webhook.send({
+            username: 'VlaamsCore Updates',
+            avatarURL: 'https://cdn.discordapp.com/embed/avatars/0.png',
+            embeds: [updateEmbed],
+        }).catch(console.error);
+    };
+
+    // Initial send
+    sendUpdate();
+
+    // Set hourly loop (3600000ms = 1 hour)
+    setInterval(sendUpdate, 3600000);
 })();
