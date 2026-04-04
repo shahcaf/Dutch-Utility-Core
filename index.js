@@ -15,6 +15,19 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`[HTTP] Web server listening on port ${PORT}`);
+    
+    // Render Free Tier Keep-Alive
+    setInterval(() => {
+        const https = require('https');
+        const url = process.env.RENDER_EXTERNAL_URL;
+        if (url) {
+            https.get(url, (res) => {
+                console.log(`[KeepAlive] Ping received - Status ${res.statusCode}`);
+            }).on('error', (err) => {
+                console.error(`[KeepAlive] Error:`, err.message);
+            });
+        }
+    }, 840000); // 14 minutes (Render spins down after 15)
 });
 
 // Discord Bot Setup

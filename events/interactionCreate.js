@@ -11,6 +11,7 @@ module.exports = {
             if (customId === 'cmd_category') return; // Ignore the choice wrapper ID if necessary, but we used value for the actual choice.
             
             if (customId.startsWith('open_ticket')) {
+                await interaction.deferReply({ ephemeral: true });
                 const parts = interaction.customId.split(':');
                 const categoryId = parts[1] === 'none' ? null : parts[1];
                 const staffRoleId = parts[2] === 'none' ? null : parts[2];
@@ -53,7 +54,7 @@ module.exports = {
                     );
 
                 await ticketChannel.send({ content: `${interaction.user} | @here`, embeds: [ticketEmbed], components: [row] });
-                return interaction.reply({ content: `✅ Ticket created: ${ticketChannel}`, ephemeral: true });
+                return interaction.editReply({ content: `✅ Ticket created: ${ticketChannel}` });
             }
 
             switch (customId) {
@@ -108,7 +109,7 @@ module.exports = {
         const command = client.commands.get(interaction.commandName);
         if (!command) {
             console.error(`[Error] No command matching ${interaction.commandName} was found.`);
-            return;
+            return interaction.reply({ content: '❌ Command not found or still loading.', ephemeral: true });
         }
 
         try {
